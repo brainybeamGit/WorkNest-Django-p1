@@ -1,150 +1,324 @@
 # WORKNEST
 ## Co-working Space Booking System
 
-**Project Name:** WorkNest – Co-working Space Booking
-
+**Project Name:** WorkNest – Co-working Space Booking  
 **Organization:** BrainyBeam Info-Tech Pvt. Ltd.
 
-**Technologies:** Python 3, Django, HTML, CSS, Bootstrap 5, JavaScript, SQLite3, ReportLab, Razorpay Test Mode.
+**Technologies:** Python 3, Django, HTML5, CSS3, Bootstrap 5, JavaScript, SQLite3, ReportLab, Razorpay Test Mode, Git, GitHub.
 
 ---
 
 # 1. Abstract
 
-WorkNest is a web-based Co-working Space Booking System designed to simplify the management and reservation of shared workspaces. The system allows members to book hot desks, private cabins, and meeting rooms according to their requirements.
+WorkNest is a web-based Co-working Space Booking System designed to simplify the reservation and management of shared workspaces. It provides a platform for members to explore workspaces such as hot desks, private cabins, and meeting rooms and make bookings according to their requirements.
 
-Members can register, log in, view available spaces, make bookings, purchase membership plans, complete payments, check in and check out, and download PDF invoices.
+The system supports member registration and login, workspace availability checking, hourly and daily bookings, monthly workspace bookings, membership plans, payment processing, check-in and check-out, and PDF invoice generation.
 
-Administrators can manage spaces, amenities, membership plans, members, bookings, payments, occupancy, and revenue reports.
+Administrators can manage workspace information, amenities, membership plans, members, bookings, payments, and related operational information through the administrative interfaces.
 
-The application will be developed using Python and Django, with SQLite3 as the database. Bootstrap 5 will be used to create a responsive interface. ReportLab will support PDF invoice generation, and Razorpay test mode will be used to test payment processing.
+The application uses Python and Django for backend development, HTML, CSS, Bootstrap, and JavaScript for the frontend, and SQLite3 for data storage. ReportLab is used for PDF invoice generation, while Razorpay test mode supports payment testing without processing real payments.
 
 # 2. Introduction
 
-WorkNest is an online platform designed to manage co-working spaces efficiently. It provides a centralized system for freelancers, startups, and professionals who require flexible workspaces.
+WorkNest is an online platform designed to organize co-working space operations through a centralized web application.
 
-The platform supports hot desks, private cabins, and meeting rooms. Members can search for available spaces, select dates and times, and make reservations online.
+Freelancers, professionals, and startup teams can use the platform to explore available workspaces, check availability, select booking periods, and manage their reservations.
 
-The system also provides membership management, payment processing, check-in and check-out, and invoice generation. Administrators can monitor bookings, occupancy, and revenue through the administrative interface.
+The application also supports membership management, payment processing, check-in and check-out, and invoice downloads. Administrative functionality helps manage workspaces and monitor booking-related information.
+
+The project demonstrates the practical application of web development, database management, authentication, booking workflows, and payment integration.
 
 # 3. Problem Statement
 
-Manual management of co-working spaces can make it difficult to track availability, manage reservations, maintain membership records, and prepare invoices. It may also lead to overlapping bookings and inefficient use of available spaces.
+Manual management of co-working spaces can make it difficult to track workspace availability, maintain booking records, manage memberships, and prepare invoices. It may also increase the risk of overlapping reservations and inefficient use of available workspaces.
 
-WorkNest aims to solve these problems by providing a centralized online system for workspace booking and administration.
+WorkNest addresses these challenges by providing a centralized web-based system for workspace booking and administration.
 
 # 4. Objectives
 
-- To provide online booking for co-working spaces.
-- To manage hot desks, private cabins, and meeting rooms.
-- To display space availability based on dates and times.
-- To provide member registration and login.
-- To manage membership plans and subscriptions.
-- To support payment processing through Razorpay test mode.
-- To implement check-in and check-out functionality.
-- To generate downloadable PDF invoices.
-- To track occupancy and revenue.
-- To simplify administrative operations.
+- Provide an online platform for workspace booking.
+- Manage workspaces, including hot desks, private cabins, and meeting rooms.
+- Allow users to check workspace availability.
+- Support hourly, daily, and monthly workspace booking options.
+- Provide member registration and login.
+- Manage membership plans and subscriptions.
+- Support payment processing and testing through Razorpay test mode.
+- Provide check-in and check-out functionality.
+- Generate downloadable PDF invoices.
+- Maintain booking, payment, and membership records.
+- Support administrative management and booking-related reporting.
 
 # 5. Scope of the Project
 
-The system will provide two primary interfaces: Admin and Member.
+WorkNest provides member-facing and administrative functionality.
 
-The Admin interface will manage spaces, amenities, membership plans, members, bookings, payments, invoices, occupancy, and revenue reports.
+## 5.1 Member Interface
 
-The Member interface will support registration, login, space searching, booking, membership purchases, payments, check-in, check-out, booking cancellation, and invoice downloads.
+The member interface supports the following operations:
 
-The application is intended to provide a convenient and organized method for managing co-working space operations.
+- Register and log in.
+- Browse workspaces.
+- Check workspace availability.
+- Create hourly, daily, and monthly bookings.
+- View booking information.
+- Purchase membership plans.
+- Make payments through the available payment workflow.
+- Check in and check out.
+- Cancel eligible bookings.
+- Download available PDF invoices.
+
+## 5.2 Administrative Interface
+
+The administrative functionality supports the management of workspaces, amenities, membership plans, members, bookings, payments, and related records.
+
+Booking and operational information can be used to monitor workspace usage and financial activity.
+
+The exact administrative operations available depend on the implemented views, permissions, and Django admin configuration.
 
 # 6. Technology Stack
 
-| Technology | Purpose |
-|---|---|
-| Python 3 | Backend programming |
-| Django | Web application framework |
-| HTML5 | Web page structure |
-| CSS3 | Styling |
-| Bootstrap 5 | Responsive interface |
-| JavaScript | Interactive functionality |
-| SQLite3 | Database management |
-| ReportLab | PDF invoice generation |
-| Razorpay Test Mode | Payment testing |
-| Git and GitHub | Version control and code hosting |
+| Sr. No. | Technology | Purpose |
+|---|---|---|
+| 1 | Python 3 | Backend programming |
+| 2 | Django | Web application framework |
+| 3 | HTML5 | Web page structure |
+| 4 | CSS3 | Styling and layout |
+| 5 | Bootstrap 5 | Responsive user interface |
+| 6 | JavaScript | Interactive frontend functionality |
+| 7 | SQLite3 | Database management |
+| 8 | ReportLab | PDF invoice generation |
+| 9 | Razorpay Test Mode | Payment integration testing |
+| 10 | Git | Version control |
+| 11 | GitHub | Source code hosting |
+| 12 | Visual Studio Code | Code editing and development |
 
 # 7. Main Modules
 
-## 7.1 Admin Module
+## 7.1 Authentication Module
 
-- Manage spaces and amenities.
-- Create and manage membership plans.
-- View and manage members.
-- Monitor bookings and occupancy.
-- Track payments and invoices.
-- Generate revenue reports.
+This module manages member registration, login, and authentication required to access protected features.
 
-## 7.2 Member Module
+## 7.2 Workspace Management Module
 
-- Register and log in.
-- Search available spaces.
-- Book desks, cabins, and meeting rooms.
-- Purchase membership plans.
-- Make payments.
-- Check in and check out.
-- Cancel eligible bookings.
-- Download PDF invoices.
+This module maintains workspace information, including workspace type, description, capacity, pricing, availability, and amenities.
 
-# 8. Main Database Tables
+## 7.3 Availability Checking Module
 
-| Table | Purpose |
-|---|---|
-| User | Store account and authentication information |
-| Space | Store workspace details and rates |
-| Amenity | Store facility information |
-| SpaceAmenity | Link spaces with amenities |
-| MembershipPlan | Store membership plan details |
-| Subscription | Store member subscriptions |
-| Booking | Store booking information |
-| CheckIn | Store arrival and departure records |
-| Invoice | Store invoice information |
-| Payment | Store payment records |
+This module allows users to check whether a workspace is available for their selected booking period.
 
-The database schema will be finalized during implementation based on the Django models and required relationships.
+The availability interface supports hourly, daily, and monthly selection options. The monthly option accepts a start date and an end date.
+
+## 7.4 Booking Management Module
+
+The booking module manages workspace reservations and their associated information.
+
+Supported booking types include:
+
+- **Hourly Booking:** Reservation based on the selected start and end times.
+- **Daily Booking:** Reservation for a full day.
+- **Monthly Booking:** Reservation for a selected date range, with pricing based on the configured monthly rate and booking duration.
+
+Booking records include information such as the member, workspace, dates, booking type, amount, and status.
+
+## 7.5 Membership Management Module
+
+This module manages membership plans and member subscriptions. Eligible membership hours can be applied to supported bookings according to the implemented business rules.
+
+## 7.6 Payment Module
+
+The payment module handles the available payment workflow and records payment-related information.
+
+Razorpay test mode is used to test online payment processing. Test mode is intended for development and does not represent a live payment transaction.
+
+## 7.7 Invoice Generation Module
+
+The system uses ReportLab to generate downloadable PDF invoices for supported transactions.
+
+Invoice information can include customer details, workspace or membership details, transaction information, and the applicable amount.
+
+## 7.8 Check-in and Check-out Module
+
+This module records member check-in and check-out information associated with workspace usage.
+
+## 7.9 Administrative Module
+
+The administrative functionality supports the management of workspaces, amenities, membership plans, members, bookings, payments, and related records.
+
+## 7.10 Reports Module
+
+Booking, occupancy, and payment information can support operational monitoring and revenue reporting through the available reporting functionality.
+
+# 8. Database Description
+
+WorkNest uses SQLite3 as its database. Django models define the application's data structures and relationships.
+
+The main models include the following:
+
+| Sr. No. | Model | Purpose |
+|---|---|---|
+| 1 | User | Stores user account and authentication information. |
+| 2 | Workspace | Stores workspace details, type, capacity, pricing, and availability. |
+| 3 | Amenity | Stores available workspace facilities. |
+| 4 | MembershipPlan | Stores membership plan information, pricing, duration, and eligible hours. |
+| 5 | Subscription | Stores member subscription records. |
+| 6 | Booking | Stores workspace reservations, dates, booking type, amount, and status. |
+| 7 | CheckIn | Stores check-in and check-out records. |
+| 8 | Invoice | Stores invoice-related information. |
+| 9 | Payment | Stores payment transaction information and payment status. |
+
+The Workspace and Amenity models have a many-to-many relationship, allowing workspaces to offer multiple amenities.
+
+The Booking model connects a member with a workspace and stores the details of the reservation.
+
+The exact database schema is defined by the Django models and migrations in the project source code.
 
 # 9. Project Workflow
 
+The general member booking workflow is as follows:
+
 1. The member registers or logs in.
-2. The member searches for available spaces.
-3. The member selects a space and booking time.
-4. The system checks availability.
-5. The booking amount is calculated.
-6. The member pays or uses eligible membership hours.
-7. The system confirms the booking.
-8. The member checks in upon arrival.
-9. The member checks out when leaving.
-10. The system records usage and generates the invoice.
+2. The member browses available workspaces.
+3. The member selects a workspace.
+4. The member checks availability for the required date or time.
+5. The member chooses an appropriate booking type.
+6. The system calculates the booking amount according to the configured pricing rules.
+7. The member proceeds through the available payment workflow or an eligible membership-hours option.
+8. The system updates the booking and payment records according to the payment result.
+9. The member uses the check-in and check-out functionality when available.
+10. The member can access the supported invoice download functionality.
 
-# 10. Testing
+# 10. Installation and Setup
 
-The application will be tested to verify:
+The following steps describe the standard process for setting up a Django project. The actual dependencies and environment settings should be checked against the project files.
 
-- Registration and login.
-- Space and amenity management.
-- Availability checking.
-- Booking creation and cancellation.
-- Membership plan purchases.
-- Payment verification.
-- Check-in and check-out.
-- PDF invoice generation.
-- Occupancy and revenue reports.
+## 10.1 Prerequisites
 
-# 11. Future Enhancements
+- Python 3
+- pip
+- Git
+- Visual Studio Code or another code editor
+- A web browser
+
+## 10.2 Download the Project
+
+Clone the project repository:
+
+```bash
+git clone https://github.com/brainybeamGit/WorkNest-Django-p1.git
+```
+
+Navigate to the project directory:
+
+```bash
+cd WorkNest-Django-p1
+```
+
+## 10.3 Create a Virtual Environment
+
+```bash
+python -m venv venv
+```
+
+Activate the virtual environment on Windows:
+
+```bash
+venv\Scripts\activate
+```
+
+## 10.4 Install Dependencies
+
+If the project contains a `requirements.txt` file, run:
+
+```bash
+pip install -r requirements.txt
+```
+
+## 10.5 Apply Database Migrations
+
+```bash
+python manage.py migrate
+```
+
+## 10.6 Create an Administrative Account
+
+```bash
+python manage.py createsuperuser
+```
+
+Enter the requested username, email address, and password.
+
+## 10.7 Run the Development Server
+
+```bash
+python manage.py runserver
+```
+
+Open the local development address in a web browser:
+
+```text
+http://127.0.0.1:8000/
+```
+
+The Django administrative interface is generally available at:
+
+```text
+http://127.0.0.1:8000/admin/
+```
+
+The exact URLs depend on the project's URL configuration.
+
+## 10.8 Payment Configuration
+
+Configure the Razorpay test credentials and other required settings according to the project's existing configuration.
+
+Secret keys and credentials should be stored securely and must not be committed to the public GitHub repository.
+
+# 11. Testing
+
+The project should be tested to verify the behavior of its main modules.
+
+| Sr. No. | Test Area | Testing Objective |
+|---|---|---|
+| 1 | Registration and Login | Verify account creation and authentication. |
+| 2 | Workspace Management | Verify workspace information and amenities. |
+| 3 | Availability Checking | Verify date and time availability checks. |
+| 4 | Hourly Booking | Verify hourly reservation and pricing. |
+| 5 | Daily Booking | Verify daily reservation and pricing. |
+| 6 | Monthly Booking | Verify the selected date range, duration, pricing, and availability. |
+| 7 | Membership | Verify membership plans and subscription records. |
+| 8 | Payment | Verify the configured payment workflow using test mode. |
+| 9 | Invoice Generation | Verify that supported transactions generate downloadable PDF invoices. |
+| 10 | Check-in and Check-out | Verify usage records. |
+| 11 | Booking Cancellation | Verify cancellation behavior and booking status. |
+| 12 | Administrative Functions | Verify access permissions and management operations. |
+| 13 | Reports | Verify the accuracy of available booking, occupancy, and revenue information. |
+
+Testing results should be recorded after each test has been performed. A feature should be marked as successfully tested only after its expected behavior has been verified.
+
+# 12. Limitations
+
+- SQLite3 is suitable for development and small-scale demonstrations but may not be appropriate for every production deployment.
+- Razorpay test mode does not process real payments.
+- The availability and functionality of individual modules depend on their implementation and configuration.
+- Production deployment requires appropriate security settings, protected credentials, and a suitable hosting environment.
+
+# 13. Future Enhancements
+
+Potential future enhancements include:
 
 - Email and SMS booking notifications.
 - QR-code-based check-in.
 - Advanced analytics dashboards.
-- Multiple co-working centre management.
+- Management of multiple co-working centres.
 - Mobile application integration.
+- Additional reporting and automated booking notifications.
 
-# 12. Conclusion
+These features should be considered future enhancements unless they are already implemented in the application.
 
-WorkNest aims to provide an efficient and user-friendly solution for co-working space management. By integrating workspace booking, membership management, payments, check-in and check-out, and invoice generation, the system will help simplify administrative activities and improve the member experience.
+# 14. Conclusion
+
+WorkNest is a web-based application for managing co-working space bookings, memberships, payments, and related administrative operations.
+
+The project demonstrates the use of Python, Django, SQLite3, HTML, CSS, Bootstrap, and JavaScript to develop a structured web application. ReportLab supports PDF invoice generation, while Razorpay test mode enables payment workflow testing.
+
+The application provides a foundation for organizing workspace reservations and member information. Further testing, documentation, and deployment improvements can help prepare the system for broader use.

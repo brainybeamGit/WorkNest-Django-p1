@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% block title %}Book {{ workspace.name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+    <h1>Book Your Workspace</h1>
+    <p>Pick a date and time — we'll confirm your seat instantly.</p>
+</div>
+
+<div class="booking-layout">
+    <aside class="booking-summary">
+        <span class="badge badge-green">{{ workspace.workspace_type }}</span>
+        <h2>{{ workspace.name }}</h2>
+        {% if workspace.description %}<p class="muted">{{ workspace.description|truncatewords:30 }}</p>{% endif %}
+        <ul class="summary-list">
+            <li><span>💰 Hourly rate</span><strong>₹{{ workspace.price_per_hour }}</strong></li>
+            <li><span>🗓️ Daily rate</span><strong>₹{{ workspace.effective_daily_rate }}</strong></li>
+            <li><span>📅 Monthly rate</span><strong>₹{{ workspace.effective_monthly_rate }}</strong></li>
+            <li><span>👥 Capacity</span><strong>{{ workspace.capacity }} people</strong></li>
+            <li><span>📶 Wi‑Fi &amp; power</span><strong>Included</strong></li>
+        </ul>
+        <div class="estimate" id="estimate" hidden>
+            <span>Estimated total</span>
+            <strong id="estimate-amount">₹0</strong>
+            <small id="estimate-hours"></small>
+        </div>
+        <a class="back-link" href="{% url 'spaces' %}">← Back to Workspaces</a>
+    </aside>
+
+    <div class="form-card booking-form-card">
+        <h2>Your details</h2>
+        <form method="POST" id="booking-form">
+            {% csrf_token %}
+            <div class="form-grid">
+                <div class="full">
+                    <label for="customer_name">Full Name</label>
+                    <input type="text" id="customer_name" name="customer_name" autocomplete="off"
+                           value="{{ request.user.get_full_name|default:request.user.username }}" maxlength="100" required>
+                </div>
+                <div>
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" value="{{ request.user.email }}" maxlength="254" required>
+                </div>
+                <div>
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" value="{{ saved_phone }}" maxlength="15" required>
+                </div>
+                <div class="full">
+                    <label>Booking Type</label>
+                    <div class="type-toggle">
+                        <label>
+                            <input type="radio" name="booking_type" value="Hourly" checked>
+                            ⏱️ By the hour
+                        </label>
+                        
+                        <label>
+                            <input type="radio" name="booking_type" value="Daily">
+                            🗓️ Full day (9 AM – 6 PM)
+                        </label>
+                        
+                        <label>
+                            
+                            <input type="radio" name="booking_type" value="Monthly">
+                            📅 Monthly
+                        </label>
+                    </div>
+                </div>
+                <div class="full">
+                    <label for="booking_date">Booking Date</label>
+                    <input type="date" id="booking_date" name="booking_date" min="{{ today }}" value="{{ prefill_date }}" required>
+                </div>
+                
+                <div class="full" id="monthly-end-date-field" style="display:none;">
+                    
+                    <label for="booking_end_date">Booking End Date</label>
+                    
+                    <input
+                    type="date"
+                    id="booking_end_date"
+                    name="booking_end_date"
+                    min="{{ today }}"
+                    >
+                    <small>Select the last date of your monthly booking.</small>
+                
+                </div>
+                <div class="time-field">
+                    <label for="start_time">Start Time</label>
+                    <input type="time" id="start_time" name="start_time" required>
+                </div>
+                <div class="time-field">
+                    <label for="end_time">End Time</label>
+                    <input type="time" id="end_time" name="end_time" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Continue to Payment →</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    const startTime = document.getElementById('start_time');
+    const endTime = document.getElementById('end_time');
+    const bookingForm = document.getElementById('booking-form');
+
+    function validateBookingTime() {
+        endTime.setCustomValidity('');
+        if (!isDaily() && startTime.value && endTime.value && endTime.value <= startTime.value) {
+            endTime.setCustomValidity('End time must be later than start time.');
+        }
+    }
+
+    const pricePerHour = parseFloat('{{ workspace.price_per_hour }}');
+    const dailyRate = parseFloat('{{ workspace.effective_daily_rate }}');
+    const monthlyRate = parseFloat('{{ workspace.effective_monthly_rate }}');
+    const typeRadios = document.querySelectorAll('input[name=booking_type]');
+    function getBookingType() 
+    {
+        return document.querySelector('input[name="booking_type"]:checked').value;
+    }
+    
+    function isDaily() 
+    {
+        return getBookingType() === 'Daily';
+    }
+    function isMonthly() 
+    {
+        return getBookingType() === 'Monthly';
+    }
+    
+    function toggleType() 
+    {
+        const daily = isDaily();
+        const monthly = isMonthly();
+        document.querySelectorAll('.time-field').forEach(el =>
+        {
+            el.style.display = (daily || monthly) ? 'none' : '';
+        });
+        const endDateField = document.getElementById('monthly-end-date-field');
+        const endDateInput = document.getElementById('booking_end_date');
+        
+        if (endDateField && endDateInput) 
+        {
+            endDateField.style.display = monthly ? '' : 'none';
+            endDateInput.required = monthly;
+        }
+        
+        startTime.required = endTime.required = !daily && !monthly;
+        updateEstimate();
+    }
+    typeRadios.forEach(r => r.addEventListener('change', toggleType));
+    function updateEstimate() 
+    {
+        const box = document.getElementById('estimate');
+        const amount = document.getElementById('estimate-amount');
+        const details = document.getElementById('estimate-hours');
+        
+        if (isMonthly()) 
+        {
+            amount.textContent = '₹' + monthlyRate.toFixed(2);
+            details.textContent = 'Monthly workspace booking · 30 days';
+            box.hidden = false;
+            return;
+        }
+        if (isDaily()) 
+        {
+            amount.textContent = '₹' + dailyRate.toFixed(2);
+            details.textContent = 'Full day · 9 hours';
+            box.hidden = false;
+            return;
+        }
+        if (startTime.value && endTime.value && endTime.value > startTime.value) {
+            const [sh, sm] = startTime.value.split(':').map(Number);
+            const [eh, em] = endTime.value.split(':').map(Number);
+            const hrs = ((eh * 60 + em) - (sh * 60 + sm)) / 60;
+
+            amount.textContent = '₹' + (hrs * pricePerHour).toFixed(2);
+            details.textContent = hrs.toFixed(2) + ' hour(s)';
+            box.hidden = false;
+        } 
+        else
+        {
+            box.hidden = true;
+        }
+    }
+    startTime.addEventListener('change', updateEstimate);
+    endTime.addEventListener('change', updateEstimate);
+    startTime.addEventListener('change', validateBookingTime);
+    endTime.addEventListener('change', validateBookingTime);
+
+    bookingForm.addEventListener('submit', function (event) {
+        validateBookingTime();
+        if (!bookingForm.checkValidity()) {
+            event.preventDefault();
+            bookingForm.reportValidity();
+        }
+    });
+</script>
+{% endblock %}

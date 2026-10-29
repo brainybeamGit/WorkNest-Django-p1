@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Payment Successful{% endblock %}
+{% block content %}
+<div class="form-card" style="text-align:center;">
+    <div class="success-icon">✓</div>
+    <h1>Payment Successful!</h1>
+    <p class="sub muted">Your WorkNest membership has been activated.</p>
+
+    <div class="info-box" style="text-align:left;">
+        <p><strong>Member:</strong> {{ subscription.member.username }}</p>
+        <p><strong>Membership:</strong> {{ subscription.plan.name }}</p>
+        <p><strong>Amount:</strong> ₹{{ payment.amount }}</p>
+        <p><strong>Start Date:</strong> {{ subscription.start_date }}</p>
+        <p><strong>Expiry Date:</strong> {{ subscription.end_date }}</p>
+        <p><strong>Transaction ID:</strong> {{ payment.transaction_id }}</p>
+        <p><strong>Payment Status:</strong> {{ payment.status }}</p>
+    </div>
+
+    {% if payment.payment_method == 'Demo' %}
+    <div class="alert alert-warning">
+        This is a simulated demo payment for project testing. No real money was charged.
+    </div>
+    {% endif %}
+
+    <div class="stack">
+        <a href="{% url 'download_invoice' subscription.id %}" class="btn btn-primary">⬇ Download PDF Invoice</a>
+        <a href="{% url 'home' %}" class="btn btn-outline">Back to Home</a>
+        <a href="{% url 'membership_plans' %}" class="btn btn-outline">View Membership Plans</a>
+    </div>
+</div>
+{% endblock %}

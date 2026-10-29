@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}My Bookings{% endblock %}
+{% block content %}
+<div class="page-head">
+    <h1>My Bookings</h1>
+    <p>Track, cancel and check in to your workspace bookings.</p>
+</div>
+
+<div class="card-grid">
+    {% for booking in bookings %}
+    <article class="card">
+        <h2 class="card-title">{{ booking.workspace.name }}</h2>
+
+        <div class="kv"><span>Type</span><span>{{ booking.booking_type }}</span></div>
+        <div class="kv"><span>Date</span><span>{{ booking.booking_date }}</span></div>
+        <div class="kv"><span>Start</span><span>{{ booking.start_time }}</span></div>
+        <div class="kv"><span>End</span><span>{{ booking.end_time }}</span></div>
+        <div class="kv"><span>Total</span><strong>₹{{ booking.total_price }}</strong></div>
+        <div class="kv">
+            <span>Status</span>
+            <span class="badge {% if booking.status == 'Confirmed' %}badge-green{% elif booking.status == 'Pending' %}badge-amber{% else %}badge-red{% endif %}">{{ booking.status }}</span>
+        </div>
+
+        <div class="kv"><span>Payment</span><span class="badge {% if booking.payment_status == 'Paid' %}badge-green{% else %}badge-amber{% endif %}">{{ booking.payment_status }}</span></div>
+
+        {% if booking.status != 'Cancelled' and booking.payment_status == 'Unpaid' %}
+        <div class="card-actions"><a href="{% url 'pay_booking' booking.id %}" class="btn btn-success">💳 Pay Now</a></div>
+        {% endif %}
+        {% if booking.payment_status == 'Paid' %}
+        <div class="card-actions"><a href="{% url 'booking_invoice' booking.id %}" class="btn btn-outline">⬇ Invoice (PDF)</a></div>
+        {% endif %}
+
+        {% if booking.status == 'Pending' or booking.status == 'Confirmed' %}
+        <div class="card-actions">
+            <form method="POST" action="{% url 'cancel_booking' booking.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Cancel Booking</button>
+            </form>
+        </div>
+        {% endif %}
+
+        {% if booking.status == 'Confirmed' %}
+            {% if booking.checkin.check_in_time %}
+                <p class="badge badge-green">✓ Checked in at {{ booking.checkin.check_in_time }}</p>
+            {% endif %}
+
+            {% if booking.checkin.check_out_time %}
+                <p class="badge badge-green">✓ Checked out at {{ booking.checkin.check_out_time }}</p>
+            {% elif booking.checkin.check_in_time %}
+                <form method="POST" action="{% url 'check_in' booking.id %}" class="card-actions">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="check_out">
+                    <button type="submit" class="btn btn-warn">Check Out</button>
+                </form>
+            {% else %}
+                <form method="POST" action="{% url 'check_in' booking.id %}" class="card-actions">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="check_in">
+                    <button type="submit" class="btn btn-success">Check In</button>
+                </form>
+            {% endif %}
+        {% endif %}
+    </article>
+    {% empty %}
+    <div class="empty-state" style="grid-column: 1 / -1;">
+        <h3>No bookings found.</h3>
+        <a href="{% url 'spaces' %}" class="btn btn-primary">Explore Workspaces</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

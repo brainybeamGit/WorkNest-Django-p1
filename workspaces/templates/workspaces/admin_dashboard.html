@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="page-head">
+    <h1>Admin Dashboard</h1>
+    <p>Manage bookings, members, payments and workspaces in one place.</p>
+</div>
+
+<nav class="admin-tabs">
+    <a href="?tab=overview" class="{% if tab == 'overview' %}active{% endif %}">📊 Overview</a>
+    <a href="?tab=bookings" class="{% if tab == 'bookings' %}active{% endif %}">📅 Bookings</a>
+    <a href="?tab=members" class="{% if tab == 'members' %}active{% endif %}">👥 Members</a>
+    <a href="?tab=memberships" class="{% if tab == 'memberships' %}active{% endif %}">🎟️ Plans &amp; Subs</a>
+    <a href="?tab=payments" class="{% if tab == 'payments' %}active{% endif %}">💳 Payments</a>
+    <a href="?tab=invoices" class="{% if tab == 'invoices' %}active{% endif %}">🧾 Invoices</a>
+    <a href="?tab=workspaces" class="{% if tab == 'workspaces' %}active{% endif %}">🏢 Workspaces</a>
+    <a href="?tab=reports" class="{% if tab == 'reports' %}active{% endif %}">📈 Reports</a>
+    <a href="/admin/" class="admin-link">⚙️ Django Admin</a>
+</nav>
+
+{% if tab == 'bookings' %}
+<form method="get" class="filter-bar">
+    <input type="hidden" name="tab" value="bookings">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search member or workspace…">
+    <select name="status">
+        <option value="">All statuses</option>
+        <option value="Pending" {% if status == 'Pending' %}selected{% endif %}>Pending</option>
+        <option value="Confirmed" {% if status == 'Confirmed' %}selected{% endif %}>Confirmed</option>
+        <option value="Cancelled" {% if status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+    </select>
+    <button class="btn btn-primary" type="submit">Filter</button>
+</form>
+<div class="table-wrap">
+    <table class="data">
+        <thead><tr><th>Member</th><th>Workspace</th><th>Date &amp; time</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% for b in bookings %}
+            <tr>
+                <td><strong>{{ b.customer_name }}</strong><br><small class="muted">{{ b.email }}</small></td>
+                <td>{{ b.workspace.name }}</td>
+                <td>{{ b.booking_date|date:"d M Y" }}<br><small class="muted">{{ b.start_time|time:"h:i A" }} – {{ b.end_time|time:"h:i A" }}</small></td>
+                <td>₹{{ b.total_price|floatformat:2 }}</td>
+                <td><span class="badge {% if b.status == 'Pending' %}badge-amber{% elif b.status == 'Confirmed' %}badge-green{% else %}badge-red{% endif %}">{{ b.status }}</span></td>
+                <td>
+                    <form method="post" action="{% url 'admin_action' %}" class="inline-actions">
+                        {% csrf_token %}
+                        <input type="hidden" name="id" value="{{ b.id }}">
+                        <input type="hidden" name="tab" value="bookings">
+                        {% if b.status != 'Confirmed' %}<button class="btn btn-sm btn-success" name="action" value="confirm_booking">Confirm</button>{% endif %}
+                        {% if b.status != 'Cancelled' %}<button class="btn btn-sm btn-danger" name="action" value="cancel_booking">Cancel</button>{% endif %}
+                    </form>
+                </td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6" class="muted" style="text-align:center;">No bookings found.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% elif tab == 'members' %}
+<form method="get" class="filter-bar">
+    <input type="hidden" name="tab" value="members">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search username or email…">
+    <button class="btn btn-primary" type="submit">Search</button>
+</form>
+<div class="table-wrap">
+    <table class="data">
+        <thead><tr><th>Member</th><th>Email</th><th>Joined</th><th>Bookings</th><th>Active plan</th><th>Role</th></tr></thead>
+        <tbody>
+        {% for m in members %}
+            <tr>
+                <td><strong>{{ m.user.username }}</strong></td>
+                <td>{{ m.user.email|default:"—" }}</td>
+                <td>{{ m.user.date_joined|date:"d M Y" }}</td>
+                <td>{{ m.user.booking_count }}</td>
+                <td>{% if m.plan %}<span class="badge badge-green">{{ m.plan }}</span>{% else %}<span class="muted">None</span>{% endif %}</td>
+                <td>{% if m.user.is_staff %}<span class="badge badge-amber">Admin</span>{% else %}Member{% endif %}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6" class="muted" style="text-align:center;">No members found.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% elif tab == 'memberships' %}
+<div class="manage-links">
+    <a class="btn btn-outline btn-sm" href="/admin/workspaces/membershipplan/add/">+ New plan</a>
+    <a class="btn btn-outline btn-sm" href="/admin/workspaces/membershipplan/">Manage plans</a>
+</div>
+<div class="table-wrap">
+    <table class="data">
+        <thead><tr><th>Member</th><th>Plan</th><th>Start</th><th>End</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% for s in subscriptions %}
+            <tr>
+                <td><strong>{{ s.member.username }}</strong><br><small class="muted">{{ s.member.email }}</small></td>
+                <td>{{ s.plan.name }}</td>
+                <td>{{ s.start_date|date:"d M Y" }}</td>
+                <td>{{ s.end_date|date:"d M Y" }}</td>
+                <td><span class="badge {% if s.status == 'Active' %}badge-green{% elif s.status == 'Expired' %}badge-gray{% else %}badge-red{% endif %}">{{ s.status }}</span></td>
+                <td>
+                    {% if s.status == 'Active' %}
+                    <form method="post" action="{% url 'admin_action' %}" class="inline-actions">
+                        {% csrf_token %}
+                        <input type="hidden" name="id" value="{{ s.id }}">
+                        <input type="hidden" name="tab" value="members">
+                        <button class="btn btn-sm btn-danger" name="action" value="cancel_subscription">Cancel</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6" class="muted" style="text-align:center;">No subscriptions yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% elif tab == 'payments' %}
+<div class="table-wrap">
+    <table class="data">
+        <thead><tr><th>Date</th><th>Member</th><th>Plan</th><th>Amount</th><th>Method</th><th>Transaction</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for p in payments %}
+            <tr>
+                <td>{{ p.created_at|date:"d M Y, h:i A" }}</td>
+                <td>{{ p.member.username }}</td>
+                <td>{% if p.booking %}Booking · {{ p.booking.workspace.name }}{% else %}{{ p.plan.name }}{% endif %}</td>
+                <td>₹{{ p.amount|floatformat:2 }}</td>
+                <td>{{ p.payment_method }}</td>
+                <td><small class="muted">{{ p.transaction_id|default:p.razorpay_order_id|default:"—" }}</small></td>
+                <td><span class="badge {% if p.status == 'Successful' %}badge-green{% elif p.status == 'Pending' %}badge-amber{% elif p.status == 'Failed' %}badge-red{% else %}badge-gray{% endif %}">{{ p.status }}</span></td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="7" class="muted" style="text-align:center;">No payments yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% elif tab == 'invoices' %}
+<div class="table-wrap">
+    <table class="data">
+        <thead><tr><th>Invoice #</th><th>Date</th><th>Member</th><th>For</th><th>Amount</th><th></th></tr></thead>
+        <tbody>
+        {% for i in invoices %}
+            <tr>
+                <td><strong>{{ i.number }}</strong></td>
+                <td>{{ i.created_at|date:"d M Y" }}</td>
+                <td>{{ i.member.username|default:"—" }}</td>
+                <td>{% if i.booking %}Booking · {{ i.booking.workspace.name }}{% elif i.subscription %}Plan · {{ i.subscription.plan.name }}{% endif %}</td>
+                <td>₹{{ i.amount|floatformat:2 }}</td>
+                <td>{% if i.booking %}<a class="btn btn-sm btn-outline" href="{% url 'booking_invoice' i.booking.id %}">⬇ PDF</a>{% elif i.subscription %}<a class="btn btn-sm btn-outline" href="{% url 'download_invoice' i.subscription.id %}">⬇ PDF</a>{% endif %}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6" class="muted" style="text-align:center;">No invoices generated yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% elif tab == 'reports' %}
+<div class="stat-grid">
+    <div class="stat" style="border-color:#7c3aed;"><h6>Total Revenue</h6><strong>₹{{ total_revenue|floatformat:2 }}</strong></div>
+    <div class="stat" style="border-color:#06b6d4;"><h6>Membership Revenue</h6><strong>₹{{ membership_revenue|floatformat:2 }}</strong></div>
+    <div class="stat" style="border-color:#10b981;"><h6>Booking Revenue</h6><strong>₹{{ booking_revenue|floatformat:2 }}</strong></div>
+    <div class="stat"><h6>Invoices Issued</h6><strong>{{ total_invoices }}</strong></div>
+</div>
+
+<div class="report-grid">
+    <div class="table-wrap">
+        <h3>Revenue – last 6 months</h3>
+        {% for m in months %}
+        <div class="bar-row">
+            <span class="bar-label">{{ m.label }}</span>
+            <div class="bar-track"><div class="bar-fill" style="width: {{ m.percent }}%"></div></div>
+            <strong>₹{{ m.total|floatformat:0 }}</strong>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="table-wrap">
+        <h3>Occupancy – last {{ window }} days</h3>
+        {% for o in occupancy %}
+        <div class="bar-row">
+            <span class="bar-label">{{ o.workspace.name }}</span>
+            <div class="bar-track"><div class="bar-fill occ" style="width: {{ o.percent }}%"></div></div>
+            <strong>{{ o.percent }}%</strong>
+        </div>
+        {% empty %}<p class="muted">No workspaces yet.</p>{% endfor %}
+    </div>
+</div>
+<a href="{% url 'revenue_report' %}" class="btn btn-primary" style="margin-top:20px;">⬇ Download revenue report (PDF)</a>
+
+{% elif tab == 'workspaces' %}
+<div class="manage-links">
+    <a class="btn btn-primary btn-sm" href="/admin/workspaces/workspace/add/">+ Add space</a>
+    <a class="btn btn-outline btn-sm" href="/admin/workspaces/amenity/add/">+ Add amenity</a>
+    <a class="btn btn-outline btn-sm" href="/admin/workspaces/amenity/">Manage amenities</a>
+</div>
+<div class="card-grid">
+    {% for w in workspaces %}
+    <div class="card">
+        <span class="badge {% if w.is_available %}badge-green{% else %}badge-gray{% endif %}">{% if w.is_available %}Available{% else %}Unavailable{% endif %}</span>
+        <h3 style="margin-top:10px;">{{ w.name }}</h3>
+        <p>{{ w.workspace_type }} · {{ w.capacity }} seat(s)</p>
+        <div class="price-big">₹{{ w.price_per_hour }}<small> / hour</small></div>
+        <form method="post" action="{% url 'admin_action' %}" class="card-actions">
+            {% csrf_token %}
+            <input type="hidden" name="id" value="{{ w.id }}">
+            <input type="hidden" name="tab" value="workspaces">
+            <button class="btn {% if w.is_available %}btn-warn{% else %}btn-success{% endif %}" name="action" value="toggle_workspace">
+                {% if w.is_available %}Mark unavailable{% else %}Mark available{% endif %}
+            </button>
+            <a class="btn btn-outline" href="/admin/workspaces/workspace/{{ w.id }}/change/">Edit</a>
+        </form>
+    </div>
+    {% empty %}
+    <div class="empty-state"><h3>No workspaces yet</h3><a class="btn btn-primary" href="/admin/workspaces/workspace/add/">Add workspace</a></div>
+    {% endfor %}
+</div>
+
+{% else %}
+<div class="stat-grid">
+    <div class="stat"><h6>Workspaces</h6><strong>{{ total_workspaces }}</strong></div>
+    <div class="stat"><h6>Total Bookings</h6><strong>{{ total_bookings }}</strong></div>
+    <div class="stat"><h6>Active Memberships</h6><strong>{{ active_subscriptions }}</strong></div>
+    <div class="stat"><h6>Members Booked</h6><strong>{{ total_members }}</strong></div>
+</div>
+<div class="stat-grid">
+    <div class="stat" style="border-color:#f59e0b;"><h6>Pending</h6><strong>{{ pending_bookings }}</strong></div>
+    <div class="stat" style="border-color:#10b981;"><h6>Confirmed</h6><strong>{{ confirmed_bookings }}</strong></div>
+    <div class="stat" style="border-color:#ef4444;"><h6>Cancelled</h6><strong>{{ cancelled_bookings }}</strong></div>
+    <div class="stat" style="border-color:#06b6d4;"><h6>Booking Value</h6><strong>₹{{ total_revenue|floatformat:2 }}</strong></div>
+    <div class="stat" style="border-color:#7c3aed;"><h6>Revenue Collected</h6><strong>₹{{ membership_revenue|floatformat:2 }}</strong></div>
+</div>
+
+<div class="table-wrap">
+    <h3>Recent Bookings</h3>
+    <table class="data">
+        <thead><tr><th>Member</th><th>Workspace</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for booking in recent_bookings %}
+            <tr>
+                <td>{{ booking.customer_name }}</td>
+                <td>{{ booking.workspace.name }}</td>
+                <td>{{ booking.booking_date|date:"d M Y" }}</td>
+                <td>₹{{ booking.total_price|floatformat:2 }}</td>
+                <td><span class="badge {% if booking.status == 'Pending' %}badge-amber{% elif booking.status == 'Confirmed' %}badge-green{% else %}badge-red{% endif %}">{{ booking.status }}</span></td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="5" class="muted" style="text-align:center;">No bookings available yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <a href="?tab=bookings" class="btn btn-primary" style="margin-top:18px;">Manage all bookings</a>
+</div>
+{% endif %}
+{% endblock %}

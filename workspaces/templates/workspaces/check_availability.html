@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block title %}Check Availability{% endblock %}
+{% block content %}
+<div class="page-head">
+    <h1>Check Availability</h1>
+    <p>Find out if your favourite spot is free before you book.</p>
+</div>
+
+<div class="booking-layout">
+    <aside class="booking-summary">
+        <span class="badge badge-green">{{ workspace.workspace_type }}</span>
+        <h2>{{ workspace.name }}</h2>
+        {% if workspace.description %}<p class="muted">{{ workspace.description|truncatewords:30 }}</p>{% endif %}
+        <ul class="summary-list">
+            <li><span>💰 Price</span><strong>₹{{ workspace.price_per_hour }} / hour</strong></li>
+            <li><span>👥 Capacity</span><strong>{{ workspace.capacity }} people</strong></li>
+        </ul>
+        <a class="back-link" href="{% url 'spaces' %}">← Back to Workspaces</a>
+    </aside>
+
+    <div class="form-card booking-form-card">
+        <h2>Pick a time slot</h2>
+        
+<form method="get">
+    <div class="form-grid">
+
+        <div class="full">
+            <label for="booking_type">Booking Type</label>
+            <select id="booking_type" name="booking_type">
+                <option value="Hourly" {% if booking_type == 'Hourly' %}selected{% endif %}>Hourly</option>
+                <option value="Daily" {% if booking_type == 'Daily' %}selected{% endif %}>Daily</option>
+                <option value="Monthly" {% if booking_type == 'Monthly' %}selected{% endif %}>Monthly</option>
+            </select>
+        </div>
+
+        
+<div class="full">
+    <label for="booking_date">Start Date</label>
+    <input
+        type="date"
+        id="booking_date"
+        name="booking_date"
+        min="{{ today }}"
+        value="{{ booking_date }}"
+        required
+    >
+</div>
+
+
+        <div class="full" id="end-date-field" style="display:none;">
+            <label for="booking_end_date">End Date</label>
+            <input
+                type="date"
+                id="booking_end_date"
+                name="booking_end_date"
+                min="{{ booking_date|default:today }}"
+                value="{{ booking_end_date }}"
+            >
+        </div>
+
+        <div class="time-field">
+            <label for="start_time">Start Time</label>
+            <input
+                type="time"
+                id="start_time"
+                name="start_time"
+                value="{{ start_time }}"
+            >
+        </div>
+
+        <div class="time-field">
+            <label for="end_time">End Time</label>
+            <input
+                type="time"
+                id="end_time"
+                name="end_time"
+                value="{{ end_time }}"
+            >
+        </div>
+
+    </div>
+
+    <button type="submit" class="btn btn-primary">Check Availability</button>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const type = document.getElementById('booking_type');
+    const endDateField = document.getElementById('end-date-field');
+    const endDateInput = document.getElementById('booking_end_date');
+    const timeFields = document.querySelectorAll('.time-field');
+    const startTime = document.getElementById('start_time');
+    const endTime = document.getElementById('end_time');
+
+    function updateFields() {
+        const monthly = type.value === 'Monthly';
+        const daily = type.value === 'Daily';
+
+        endDateField.style.display = monthly ? '' : 'none';
+        endDateInput.required = monthly;
+
+        timeFields.forEach(field => {
+            field.style.display = (monthly || daily) ? 'none' : '';
+        });
+
+        startTime.required = !monthly && !daily;
+        endTime.required = !monthly && !daily;
+    }
+
+    type.addEventListener('change', updateFields);
+    updateFields();
+});
+</script>
+
+
+        {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% elif available == True %}
+            <div class="alert alert-success">
+                ✅ This workspace is available for your selected time!
+                <a href="{% url 'booking' workspace.id %}">Book Now</a>
+            </div>
+        {% elif available == False %}
+            <div class="alert alert-warning">
+                ⚠️ Sorry, this workspace is already booked for the selected time. Please try another time.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}{{ workspace.name }} – Calendar{% endblock %}
+{% block content %}
+<div class="page-head">
+    <h1>{{ workspace.name }} – Availability</h1>
+    <p>{{ workspace.workspace_type }} · ₹{{ workspace.price_per_hour }}/hour · ₹{{ workspace.effective_daily_rate }}/day</p>
+</div>
+
+<div class="calendar-layout">
+    <div class="cal-card">
+        <div class="cal-head">
+            <a class="btn btn-outline btn-sm" href="?month={{ prev_month }}">← Prev</a>
+            <h2>{{ month_label }}</h2>
+            <a class="btn btn-outline btn-sm" href="?month={{ next_month }}">Next →</a>
+        </div>
+
+        <div class="cal-grid cal-weekdays">
+            {% for d in weekdays %}<div>{{ d }}</div>{% endfor %}
+        </div>
+        <div class="cal-grid">
+            {% for week in weeks %}{% for cell in week %}
+            <a class="cal-day {{ cell.state }}{% if not cell.in_month %} other{% endif %}{% if cell.today %} today{% endif %}{% if selected == cell.date %} selected{% endif %}"
+               href="?month={{ month_param }}&day={{ cell.date|date:'Y-m-d' }}">{{ cell.date.day }}</a>
+            {% endfor %}{% endfor %}
+        </div>
+
+        <div class="cal-legend">
+            <span><i class="dot free"></i> Available</span>
+            <span><i class="dot partial"></i> Partly booked</span>
+            <span><i class="dot busy"></i> Fully booked</span>
+        </div>
+    </div>
+
+    <aside class="cal-side">
+        {% if selected %}
+        <h3>{{ selected|date:"l, d M Y" }}</h3>
+        {% if slots %}
+            <p class="muted">Booked slots:</p>
+            <ul class="slot-list">
+                {% for s in slots %}<li>🔒 {{ s.start_time|time:"h:i A" }} – {{ s.end_time|time:"h:i A" }}</li>{% endfor %}
+            </ul>
+        {% else %}
+            <p class="muted">No bookings yet – the whole day is free.</p>
+        {% endif %}
+        {% if not selected_past %}
+            <a class="btn btn-primary" href="{% url 'booking' workspace.id %}?date={{ selected|date:'Y-m-d' }}">Book this day</a>
+        {% endif %}
+        {% else %}
+        <h3>Select a date</h3>
+        <p class="muted">Tap a day on the calendar to see booked time slots and book it.</p>
+        {% endif %}
+        <p class="form-foot" style="text-align:left;"><a href="{% url 'spaces' %}">← Back to Workspaces</a></p>
+    </aside>
+</div>
+{% endblock %}

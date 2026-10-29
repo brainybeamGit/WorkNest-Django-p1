@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Spaces{% endblock %}
+{% block content %}
+<div class="page-head">
+    <h1>Explore Our Workspaces</h1>
+    <p>Hot desks, private cabins and meeting rooms, booked by the hour.</p>
+</div>
+
+<div class="card-grid">
+    {% for workspace in workspaces %}
+    <article class="card">
+        <span class="tag">{{ workspace.workspace_type }}</span>
+        <h2 class="card-title">{{ workspace.name }}</h2>
+        <p>{{ workspace.description|truncatechars:140 }}</p>
+
+        <div class="chips">
+            {% for amenity in workspace.amenities.all %}
+                <span class="chip">✓ {{ amenity.name }}</span>
+            {% empty %}
+                <span class="chip empty">No amenities added</span>
+            {% endfor %}
+        </div>
+
+        <div class="price-big">₹{{ workspace.price_per_hour }}<small> / hour · ₹{{ workspace.effective_daily_rate }} / day</small></div>
+
+        <div class="kv"><span>Capacity</span><span>{{ workspace.capacity }} people</span></div>
+        <div class="kv"><span>Status</span><span class="badge badge-green">Available</span></div>
+
+        <div class="card-actions">
+            <a href="{% url 'booking' workspace.id %}" class="btn btn-primary">Book Now</a>
+            <a href="{% url 'check_availability' workspace.id %}" class="btn btn-outline">📅 Calendar</a>
+        </div>
+    </article>
+    {% empty %}
+    <div class="empty-state" style="grid-column: 1 / -1;">
+        <h3>No workspaces are currently available.</h3>
+        <p class="muted">Please check back soon.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

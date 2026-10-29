@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="WorkNest - flexible co-working spaces for freelancers. Book hot desks, private cabins and meeting rooms.">
+    <title>WorkNest | Co-working Spaces for Freelancers</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'workspaces/css/home.css' %}">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="wrap nav-row">
+        <a href="/" class="brand">Work<span>Nest</span></a>
+
+        <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="Toggle menu">
+        <label for="nav-toggle" class="burger"><span></span><span></span><span></span></label>
+
+        <nav class="menu">
+            <a href="#spaces">Spaces</a>
+            <a href="#how">How it works</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#faq">FAQ</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'my_bookings' %}">My Bookings</a>
+                <a href="{% url 'my_membership' %}">My Membership</a>
+                {% if user.is_staff %}<a href="{% url 'admin_dashboard' %}">Dashboard</a>{% endif %}
+                <form action="{% url 'logout' %}" method="POST" class="inline-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-ghost">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'login' %}?next={% url 'admin_dashboard' %}">Admin</a>
+                <a href="{% url 'register' %}" class="btn btn-primary">Join free</a>
+            {% endif %}
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="hero">
+        <div class="wrap hero-grid">
+            <div class="hero-text">
+                <span class="pill">🚀 Built for freelancers &amp; remote teams</span>
+                <h1>Your desk, your rules. <em>Work where you thrive.</em></h1>
+                <p>Book a hot desk, private cabin or meeting room by the hour. Fast Wi-Fi, great coffee and a community of makers, with no long-term lock-in.</p>
+                <div class="cta-row">
+                    <a href="{% url 'spaces' %}" class="btn btn-primary btn-lg">Explore spaces</a>
+                    <a href="#pricing" class="btn btn-outline btn-lg">See memberships</a>
+                </div>
+                <ul class="trust">
+                    <li>✓ Pay per hour</li>
+                    <li>✓ Instant booking</li>
+                    <li>✓ Secure Razorpay payments</li>
+                </ul>
+            </div>
+
+            <div class="hero-card" aria-hidden="true">
+                <div class="mock-head"><span></span><span></span><span></span></div>
+                <div class="mock-row"><b>💻 Hot Desk</b><i>Available</i></div>
+                <div class="mock-row"><b>🏢 Private Cabin</b><i>Available</i></div>
+                <div class="mock-row"><b>🤝 Meeting Room</b><i class="busy">2 PM - 4 PM busy</i></div>
+                <div class="mock-pay">Pay securely with Razorpay</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats">
+        <div class="wrap stats-grid">
+            <div><strong>{{ workspace_count|default:"20" }}+</strong><span>Workspaces</span></div>
+            <div><strong>24/7</strong><span>Member access</span></div>
+            <div><strong>1 Gbps</strong><span>Fiber Wi-Fi</span></div>
+            <div><strong>4.9★</strong><span>Member rating</span></div>
+        </div>
+    </section>
+
+    <section class="section" id="spaces">
+        <div class="wrap">
+            <h2 class="title">Find the space that fits your day</h2>
+            <p class="sub">From a quick desk for a few hours to a private cabin for your team.</p>
+
+            <div class="grid-3">
+                <article class="tile">
+                    <div class="icon">💻</div>
+                    <h3>Hot Desks</h3>
+                    <p>Grab any open desk. Perfect for solo freelancers who want focus and community.</p>
+                </article>
+                <article class="tile">
+                    <div class="icon">🏢</div>
+                    <h3>Private Cabins</h3>
+                    <p>Lockable, quiet cabins for small teams and client work.</p>
+                </article>
+                <article class="tile">
+                    <div class="icon">🤝</div>
+                    <h3>Meeting Rooms</h3>
+                    <p>Projector-ready rooms to pitch, interview and collaborate.</p>
+                </article>
+            </div>
+
+            {% if featured_workspaces %}
+            <h3 class="mini-title">Featured right now</h3>
+            <div class="grid-3">
+                {% for w in featured_workspaces %}
+                <article class="space-card">
+                    <span class="tag">{{ w.workspace_type }}</span>
+                    <h3>{{ w.name }}</h3>
+                    <p>{{ w.description|truncatechars:90 }}</p>
+                    <div class="space-foot">
+                        <strong>₹{{ w.price_per_hour }}<small>/hour</small></strong>
+                        <a href="{% url 'booking' w.id %}" class="btn btn-primary btn-sm">Book</a>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="center"><a href="{% url 'spaces' %}" class="btn btn-outline">View all spaces →</a></div>
+        </div>
+    </section>
+
+    <section class="section alt">
+        <div class="wrap">
+            <h2 class="title">Everything a freelancer needs</h2>
+            <div class="grid-4">
+                <div class="perk"><span>📶</span><h4>Blazing Wi-Fi</h4><p>Dedicated fiber with backup.</p></div>
+                <div class="perk"><span>☕</span><h4>Unlimited coffee</h4><p>Tea, coffee and snacks on tap.</p></div>
+                <div class="perk"><span>🖨️</span><h4>Print &amp; scan</h4><p>Business-grade printers.</p></div>
+                <div class="perk"><span>🔒</span><h4>Secure access</h4><p>Lockers and 24/7 safety.</p></div>
+                <div class="perk"><span>🎧</span><h4>Focus zones</h4><p>Quiet areas for deep work.</p></div>
+                <div class="perk"><span>👥</span><h4>Community</h4><p>Meetups, workshops, networking.</p></div>
+                <div class="perk"><span>⚡</span><h4>Power backup</h4><p>Never lose a work session.</p></div>
+                <div class="perk"><span>🧾</span><h4>PDF invoices</h4><p>Instant invoices for taxes.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="how">
+        <div class="wrap">
+            <h2 class="title">Book in 4 simple steps</h2>
+            <div class="grid-4 steps">
+                <div class="step"><b>1</b><h4>Sign up</h4><p>Create your free account in a minute.</p></div>
+                <div class="step"><b>2</b><h4>Pick a space</h4><p>Choose a desk, cabin or room and a time.</p></div>
+                <div class="step"><b>3</b><h4>Pay securely</h4><p>Pay online using Razorpay (UPI, cards, netbanking).</p></div>
+                <div class="step"><b>4</b><h4>Check in &amp; work</h4><p>Show up, check in and get things done.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section alt" id="pricing">
+        <div class="wrap">
+            <h2 class="title">Membership plans</h2>
+            <p class="sub">Save more with free hours and flexible durations.</p>
+
+            <div class="grid-3">
+                {% for plan in membership_plans %}
+                <article class="plan {% if forloop.counter == 2 %}popular{% endif %}">
+                    {% if forloop.counter == 2 %}<span class="ribbon">Most popular</span>{% endif %}
+                    <h3>{{ plan.name }}</h3>
+                    <div class="price">₹{{ plan.price }}<small> / {{ plan.duration_days }} days</small></div>
+                    <p class="muted">{{ plan.description|default:"A flexible membership for your workspace needs." }}</p>
+                    <ul>
+                        <li>✓ {{ plan.free_hours }} free workspace hours</li>
+                        <li>✓ Priority booking</li>
+                        <li>✓ PDF invoice</li>
+                    </ul>
+                    <a href="{% url 'subscribe_plan' plan.id %}" class="btn btn-primary btn-block">Choose plan</a>
+                </article>
+                {% empty %}
+                <p class="center muted">No membership plans are available right now.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="wrap">
+            <h2 class="title">Loved by freelancers</h2>
+            <div class="grid-3">
+                <blockquote class="quote">“I moved from my noisy home to WorkNest and doubled my productivity. Booking takes seconds.”<cite>Aarav, UI Designer</cite></blockquote>
+                <blockquote class="quote">“The private cabin is perfect for client calls, and the invoices make my accounting easy.”<cite>Meera, Consultant</cite></blockquote>
+                <blockquote class="quote">“Great community. I found two clients just by working at the common desk.”<cite>Rohan, Developer</cite></blockquote>
+            </div>
+        </div>
+    </section>
+
+    <section class="section alt" id="faq">
+        <div class="wrap narrow">
+            <h2 class="title">Frequently asked questions</h2>
+            <details><summary>Can I book by the hour?</summary><p>Yes. Choose your date and start and end time, and the price is calculated automatically.</p></details>
+            <details><summary>Which payment methods are supported?</summary><p>UPI, debit/credit cards and netbanking through Razorpay.</p></details>
+            <details><summary>Can I cancel a booking?</summary><p>Yes. Open My Bookings and cancel an eligible booking.</p></details>
+            <details><summary>Do I get an invoice?</summary><p>Yes. Download a PDF invoice from My Membership.</p></details>
+        </div>
+    </section>
+
+    <section class="cta-band">
+        <div class="wrap">
+            <h2>Ready to find your nest?</h2>
+            <p>Join WorkNest today and book your first space in minutes.</p>
+            {% if user.is_authenticated %}
+                <a href="{% url 'spaces' %}" class="btn btn-light btn-lg">Book a space</a>
+            {% else %}
+                <a href="{% url 'register' %}" class="btn btn-light btn-lg">Create free account</a>
+            {% endif %}
+        </div>
+    </section>
+</main>
+
+<footer class="footer">
+    <div class="wrap foot-grid">
+        <div>
+            <a href="/" class="brand light">Work<span>Nest</span></a>
+            <p>Flexible co-working spaces for freelancers, startups and remote professionals.</p>
+        </div>
+        <div>
+            <h5>Explore</h5>
+            <a href="{% url 'spaces' %}">Spaces</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#faq">FAQ</a>
+        </div>
+        <div>
+            <h5>Account</h5>
+            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'register' %}">Register</a>
+            <a href="/admin/">Admin</a>
+        </div>
+        <div>
+            <h5>Contact</h5>
+            <p>hello@worknest.example<br>Mon-Sat, 8 AM - 10 PM</p>
+        </div>
+    </div>
+    <div class="copy">© 2026 WorkNest. All rights reserved.</div>
+</footer>
+
+</body>
+</html>

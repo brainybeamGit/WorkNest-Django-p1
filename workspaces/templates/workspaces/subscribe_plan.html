@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}{{ plan.name }}{% endblock %}
+{% block content %}
+<div class="form-card">
+    <h1>{{ plan.name }}</h1>
+    <div class="price-big" style="text-align:center;">₹{{ plan.price }}</div>
+    <div class="info-box">
+        <p><strong>Duration:</strong> {{ plan.duration_days }} days</p>
+        <p><strong>Free Workspace Hours:</strong> {{ plan.free_hours }} hours</p>
+        <p>{{ plan.description|default:"A flexible membership for your workspace needs." }}</p>
+    </div>
+    <a class="btn btn-primary" href="{% url 'subscribe_plan' plan.id %}">Proceed to Payment</a>
+    <p class="form-foot"><a href="{% url 'membership_plans' %}">← Back to Membership Plans</a></p>
+</div>
+{% endblock %}

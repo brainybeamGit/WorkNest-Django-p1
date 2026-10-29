@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}My Membership{% endblock %}
+{% block content %}
+<div class="page-head">
+    <h1>My Membership</h1>
+    <p>Your plans, free hours and invoices.</p>
+</div>
+
+<div class="hours-card">
+    <div>
+        <span class="muted">Free hours remaining</span>
+        <div class="hours-big">{{ hours_left }} <small>of {{ hours_total }} h</small></div>
+        <div class="bar-track"><div class="bar-fill occ" style="width: {{ hours_percent }}%"></div></div>
+        <p class="muted" style="margin-top:8px;">{{ hours_used }} h used across your active plans.</p>
+    </div>
+    <a class="btn btn-primary" href="{% url 'spaces' %}">Book with free hours</a>
+</div>
+
+<div class="card-grid">
+    {% for subscription in subscriptions %}
+    <article class="card">
+        <h2 class="card-title">{{ subscription.plan.name }}</h2>
+
+        <div class="kv"><span>Amount</span><strong>₹{{ subscription.plan.price }}</strong></div>
+        <div class="kv"><span>Start Date</span><span>{{ subscription.start_date|date:"d M Y" }}</span></div>
+        <div class="kv"><span>Expiry Date</span><span>{{ subscription.end_date|date:"d M Y" }}</span></div>
+        <div class="kv"><span>Free Hours</span><span>{{ subscription.plan.free_hours }} hours</span></div>
+        <div class="kv">
+            <span>Status</span>
+            <span class="badge {% if subscription.status == 'Active' %}badge-green{% elif subscription.status == 'Expired' %}badge-gray{% else %}badge-red{% endif %}">{{ subscription.status }}</span>
+        </div>
+
+        <div class="card-actions">
+            <a class="btn btn-primary" href="{% url 'download_invoice' subscription.id %}">⬇ Download Invoice</a>
+        </div>
+    </article>
+    {% empty %}
+    <div class="empty-state" style="grid-column: 1 / -1;">
+        <h2>No Membership Found</h2>
+        <p class="muted">You have not purchased a membership plan yet.</p>
+        <a class="btn btn-primary" href="{% url 'membership_plans' %}">Explore Membership Plans</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

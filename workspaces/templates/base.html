@@ -1,0 +1,82 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}WorkNest{% endblock %} | WorkNest</title>
+    <link rel="stylesheet" href="{% static 'workspaces/css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'workspaces/css/app.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+<header class="site-header">
+    <div class="wrap nav-row">
+        <a href="{% url 'home' %}" class="brand">Work<span>Nest</span></a>
+
+        <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="Toggle menu">
+        <label for="nav-toggle" class="burger"><span></span><span></span><span></span></label>
+
+        <nav class="menu">
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'spaces' %}">Spaces</a>
+            <a href="{% url 'membership_plans' %}">Memberships</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'my_bookings' %}">My Bookings</a>
+                <a href="{% url 'my_membership' %}">My Membership</a>
+                {% if user.is_staff %}<a href="{% url 'admin_dashboard' %}">Dashboard</a>{% endif %}
+                <form action="{% url 'logout' %}" method="POST" class="inline-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-ghost">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'login' %}?next={% url 'admin_dashboard' %}">Admin</a>
+                <a href="{% url 'register' %}" class="btn btn-primary">Join free</a>
+            {% endif %}
+        </nav>
+    </div>
+</header>
+
+<main class="page">
+    <div class="wrap">
+        {% if messages %}
+        <div class="flash-stack">
+            {% for message in messages %}
+                <div class="flash flash-{{ message.tags|default:'info' }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="wrap foot-grid">
+        <div>
+            <a href="{% url 'home' %}" class="brand light">Work<span>Nest</span></a>
+            <p>Flexible co-working spaces for freelancers, startups and remote professionals.</p>
+        </div>
+        <div>
+            <h5>Explore</h5>
+            <a href="{% url 'spaces' %}">Spaces</a>
+            <a href="{% url 'membership_plans' %}">Memberships</a>
+        </div>
+        <div>
+            <h5>Account</h5>
+            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'register' %}">Register</a>
+            <a href="/admin/">Admin</a>
+        </div>
+        <div>
+            <h5>Contact</h5>
+            <p>hello@worknest.example<br>Mon-Sat, 8 AM - 10 PM</p>
+        </div>
+    </div>
+    <div class="copy">© 2026 WorkNest. All rights reserved.</div>
+</footer>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="form-card narrow">
+    <h1>Welcome back 👋</h1>
+    <p class="sub muted" style="text-align:center;">Log in to manage your bookings and membership.</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.GET.next }}">
+
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="Enter your username" required autofocus>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+
+    <p class="form-foot">Don't have an account? <a href="{% url 'register' %}">Create Account</a></p>
+</div>
+{% endblock %}

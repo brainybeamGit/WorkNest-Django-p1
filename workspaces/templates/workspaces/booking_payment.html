@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% block title %}Pay for Booking{% endblock %}
+{% block content %}
+<div class="page-head">
+    <h1>Complete Your Booking</h1>
+    <p>Pay securely or use your membership hours to confirm this booking.</p>
+</div>
+
+<div class="booking-layout">
+    <aside class="booking-summary">
+        <span class="badge badge-green">{{ booking.booking_type }}</span>
+        <h2>{{ booking.workspace.name }}</h2>
+        <ul class="summary-list">
+
+    {% if booking.booking_type == 'Monthly' %}
+
+        <li>
+            <span>📅 Start Date</span>
+            <strong>{{ booking.booking_date|date:"d M Y" }}</strong>
+        </li>
+
+        <li>
+            <span>📅 End Date</span>
+            <strong>{{ booking.booking_end_date|date:"d M Y" }}</strong>
+        </li>
+        <li>
+            
+            <span>🗓️ Duration</span>
+            <strong>{{ monthly_days }} days</strong>
+        </li>
+
+    {% else %}
+
+        <li>
+            <span>📅 Date</span>
+            <strong>{{ booking.booking_date|date:"d M Y" }}</strong>
+        </li>
+
+        <li>
+            <span>🕒 Time</span>
+            <strong>{{ booking.start_time|time:"h:i A" }} – {{ booking.end_time|time:"h:i A" }}</strong>
+        </li>
+
+        <li>
+            <span>⏱️ Duration</span>
+            <strong>{{ hours }} h</strong>
+        </li>
+
+    {% endif %}
+
+</ul>
+        <div class="estimate">
+            <span>Amount due</span>
+            <strong>₹{{ booking.total_price }}</strong>
+        </div>
+    </aside>
+
+    <div class="form-card booking-form-card">
+        <h2>Choose how to pay</h2>
+
+        {% if order_id %}
+        <div class="alert alert-warning" style="margin-top:12px;">
+            <strong>Razorpay Test Mode:</strong> use Razorpay's test card or UPI. No real money is charged.
+        </div>
+        <button id="rzp-button" type="button" class="btn btn-primary">Pay ₹{{ booking.total_price }} with Razorpay</button>
+        <form id="rzp-form" method="POST" action="{% url 'verify_booking_payment' %}">
+            {% csrf_token %}
+            <input type="hidden" name="razorpay_payment_id" id="rzp_payment_id">
+            <input type="hidden" name="razorpay_order_id" id="rzp_order_id">
+            <input type="hidden" name="razorpay_signature" id="rzp_signature">
+        </form>
+        {% else %}
+        <div class="pay-option">
+            <div>
+                <h3>💳 Pay now</h3>
+                <p class="muted">{% if razorpay_enabled %}Pay ₹{{ booking.total_price }} via Razorpay (cards, UPI, netbanking).{% else %}Demo mode – no real money is charged.{% endif %}</p>
+            </div>
+            <form method="POST">
+                {% csrf_token %}
+                <button class="btn btn-primary" name="action" value="pay">Pay ₹{{ booking.total_price }}</button>
+            </form>
+        </div>
+
+        {% if booking.booking_type != 'Monthly' %}
+        <div class="pay-option {% if not plan_covers %}disabled{% endif %}">
+            <div>
+                <h3>🎟️ Use membership hours</h3>
+                <p class="muted">
+                    {% if free_hours %}You have <strong>{{ free_hours }} free hour(s)</strong> left.
+                    {% if not plan_covers %}This booking needs {{ hours }} h.{% endif %}
+                    {% else %}No free plan hours available. <a href="{% url 'membership_plans' %}" style="color:var(--primary);font-weight:600;">View plans</a>{% endif %}
+                </p>
+            </div>
+            <form method="POST">
+                {% csrf_token %}
+                <button class="btn btn-success" name="action" value="plan" {% if not plan_covers %}disabled{% endif %}>Use {{ hours }} h</button>
+            </form>
+        </div>
+        {% endif %}
+        <div class="pay-option">
+            <div>
+                <h3>🕓 Pay later</h3>
+                <p class="muted">Keep the booking as pending and pay from My Bookings.</p>
+            </div>
+            <a class="btn btn-outline" href="{% url 'my_bookings' %}">Later</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if order_id %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    var rzp = new Razorpay({
+        key: "{{ razorpay_key }}",
+        amount: "{{ amount_paise }}",
+        currency: "INR",
+        name: "WorkNest",
+        description: "{{ booking.workspace.name|escapejs }} booking",
+        order_id: "{{ order_id }}",
+        prefill: {
+            name: "{{ booking.customer_name|escapejs }}",
+            email: "{{ booking.email|escapejs }}",
+            contact: "{{ booking.phone|escapejs }}"
+        },
+        theme: { color: "#4f46e5" },
+        handler: function (r) {
+            document.getElementById('rzp_payment_id').value = r.razorpay_payment_id;
+            document.getElementById('rzp_order_id').value = r.razorpay_order_id;
+            document.getElementById('rzp_signature').value = r.razorpay_signature;
+            document.getElementById('rzp-form').submit();
+        }
+    });
+    document.getElementById('rzp-button').onclick = function () { rzp.open(); };
+    rzp.open();
+</script>
+{% endif %}
+{% endblock %}

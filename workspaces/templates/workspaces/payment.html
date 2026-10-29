@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Payment{% endblock %}
+{% block content %}
+<div class="form-card">
+    <h1>Complete Your Payment</h1>
+    <p class="sub muted" style="text-align:center;">Review your membership details</p>
+
+    <div class="info-box">
+        <h3 class="card-title">{{ plan.name }}</h3>
+        <div class="price-big">₹{{ plan.price }}</div>
+        <p><strong>Duration:</strong> {{ plan.duration_days }} days</p>
+        <p><strong>Free Hours:</strong> {{ plan.free_hours }} hours</p>
+        <p><strong>Member:</strong> {{ request.user.username }}</p>
+    </div>
+
+    {% if order_id %}
+    <div class="alert alert-warning" style="margin-top:0;">
+        <strong>Razorpay Test Mode:</strong> Use Razorpay's test card or UPI details. No real money will be charged.
+    </div>
+
+    <button id="rzp-button" type="button" class="btn btn-primary">Pay ₹{{ plan.price }} with Razorpay</button>
+
+    <form id="rzp-form" method="POST" action="{% url 'verify_payment' %}">
+        {% csrf_token %}
+        <input type="hidden" name="razorpay_payment_id" id="rzp_payment_id">
+        <input type="hidden" name="razorpay_order_id" id="rzp_order_id">
+        <input type="hidden" name="razorpay_signature" id="rzp_signature">
+    </form>
+    {% else %}
+    <div class="alert alert-warning" style="margin-top:0;">
+        {% if razorpay_enabled %}
+        <strong>Razorpay Test Mode:</strong> You'll pay securely via Razorpay. No real money is charged in test mode.
+        {% else %}
+        <strong>Demo Mode:</strong> No real money will be charged. This is only for project testing.
+        {% endif %}
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">
+            {% if razorpay_enabled %}Pay ₹{{ plan.price }} with Razorpay{% else %}Pay Now (Demo){% endif %}
+        </button>
+    </form>
+    {% endif %}
+
+    <p class="form-foot"><a href="{% url 'membership_plans' %}">← Back to Membership Plans</a></p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if order_id %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    var options = {
+        key: "{{ razorpay_key }}",
+        amount: "{{ amount_paise }}",
+        currency: "INR",
+        name: "WorkNest",
+        description: "{{ plan.name|escapejs }} membership",
+        order_id: "{{ order_id }}",
+        prefill: {
+            name: "{{ request.user.username|escapejs }}",
+            email: "{{ request.user.email|escapejs }}"
+        },
+        theme: { color: "#4f46e5" },
+        handler: function (response) {
+            document.getElementById('rzp_payment_id').value = response.razorpay_payment_id;
+            document.getElementById('rzp_order_id').value = response.razorpay_order_id;
+            document.getElementById('rzp_signature').value = response.razorpay_signature;
+            document.getElementById('rzp-form').submit();
+        }
+    };
+    var rzp = new Razorpay(options);
+    document.getElementById('rzp-button').onclick = function () { rzp.open(); };
+    rzp.open();
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Memberships{% endblock %}
+{% block content %}
+<div class="page-head">
+    <h1>Choose Your Membership</h1>
+    <p>Flexible plans designed for your productivity.</p>
+</div>
+
+<div class="card-grid">
+    {% for plan in plans %}
+    <article class="card">
+        <h2 class="card-title">{{ plan.name }}</h2>
+        <div class="price-big">₹{{ plan.price }}<small> / {{ plan.duration_days }} days</small></div>
+        <p>✓ {{ plan.free_hours }} free workspace hours</p>
+        <p>✓ Access to WorkNest membership</p>
+        <p>✓ Flexible workspace booking</p>
+        <div class="card-actions">
+            <a href="{% url 'subscribe_plan' plan.id %}" class="btn btn-primary">Select Plan</a>
+        </div>
+    </article>
+    {% empty %}
+    <div class="empty-state" style="grid-column: 1 / -1;">
+        <p>No membership plans are available right now.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
